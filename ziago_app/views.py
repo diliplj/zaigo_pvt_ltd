@@ -178,7 +178,7 @@ class CRUD_RolesView(viewsets.ModelViewSet):
 
     @all_admin
     @logged_in
-    def retrieve(self,request,pk):
+    def read(self,request,pk):
         data = self.get_queryset(pk=pk)
         serializer = self.serializer_class(data)
         return Response(serializer.data)
@@ -241,7 +241,7 @@ class CRUD_RightsView(viewsets.ModelViewSet):
     
     @all_admin
     @logged_in
-    def retrieve(self,request,pk):
+    def read(self,request,pk):
         data = self.get_queryset(pk=pk)
         serializer = self.serializer_class(data)
         return Response(serializer.data)

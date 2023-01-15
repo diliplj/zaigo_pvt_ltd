@@ -82,23 +82,26 @@ def all_admin(func):
     def wrapper(self,request, *args, **kwargs):
         try:
             url = str(request.get_full_path()).split('/')[1]
-            check_role = Members.objects.get(member_name= self.request.user,datamode="A")
-            role = str(check_role.role.role_name)
-            technicians_rights = get_rights(self,role)
-            if role in ['admin','super admin']:
-                return func(self,request, *args, **kwargs)
-            elif role in ['technicians'] and url =="read" and url in technicians_rights:
-                read_url_id_role = int(kwargs.get('pk',0))
-                check_post_id_role = Members.objects.get(id= read_url_id_role,datamode="A")
-                if str(check_post_id_role.role.role_name) == str(role):
+            if self.request.user != "AnonymousUser":
+                check_role = Members.objects.get(member_name= self.request.user,datamode="A")
+                role = str(check_role.role.role_name)
+                technicians_rights = get_rights(self,role)
+                if role in ['admin','super admin']:
                     return func(self,request, *args, **kwargs)
+                elif role in ['technicians'] and url =="read" and url in technicians_rights:
+                    read_url_id_role = int(kwargs.get('pk',0))
+                    check_post_id_role = Members.objects.get(id= read_url_id_role,datamode="A")
+                    if str(check_post_id_role.role.role_name) == str(role):
+                        return func(self,request, *args, **kwargs)
+                    else:
+                        return Response({'msg':'You dont have access to view admins detail'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
                 else:
-                    return Response({'msg':'You dont have access to view admins detail'}, status=status.HTTP_401_UNAUTHORIZED)
-
-
-            else:
-                return Response({'msg':'Only admin and super admin only have access . others dont have access'}, status=status.HTTP_401_UNAUTHORIZED)
+                    return Response({'msg':'Only admin and super admin only have access . others dont have access'}, status=status.HTTP_401_UNAUTHORIZED)
             
+            else:
+                return redirect('login')
 
         except Exception as e:
             print("error  all admin decorator",e)
